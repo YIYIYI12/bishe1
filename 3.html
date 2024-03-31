@@ -1,0 +1,298 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>红色旅游查询系统</title>
+    <script type="module" src="https://js.arcgis.com/calcite-components/1.9.2/calcite.esm.js"></script>
+    <link rel="stylesheet" type="text/css" href="https://js.arcgis.com/calcite-components/1.9.2/calcite.css" />
+    <link rel="stylesheet" href="https://js.arcgis.com/4.28/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.28/"></script>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            height: 100%;
+            width: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+        }
+        .panel-side {
+            padding: 2px;
+            width: 390px;
+            height: 100%;
+            position: absolute;
+            top: 0;
+            right: 0;
+            z-index: 60;
+        }
+        .action-button {
+            font-size: 16px;
+            background-color: white;
+            border: 1px solid #d3d3d3;
+            color: #6e6e6e;
+            height: 32px;
+            width: 32px;
+            text-align: center;
+            box-shadow: 0 0 1px rgba(0, 0, 0, 0.3);
+        }
+        .action-button:hover,
+        .action-button:focus {
+            background: #0079c1;
+            color: #e4e4e4;
+        }
+        .active {
+            background: #0079c1;
+            color: #e4e4e4;
+        }
+        #resultsDiv {
+            overflow: auto;
+        }
+    </style>
+    <script>
+        require([
+            "esri/config",
+            "esri/WebMap",
+            "esri/views/MapView",
+            "esri/layers/FeatureLayer",
+            "esri/widgets/Locate",
+            "esri/widgets/AreaMeasurement2D",
+            "esri/widgets/DistanceMeasurement2D",
+        ], (esriConfig,WebMap, MapView,FeatureLayer,Locate,AreaMeasurement2D,DistanceMeasurement2D) =>
+            (async () => {
+                esriConfig.apiKey = "AAPK842e3403e5b24c3bb6364ccb160bf621flv8I-Kv6HKAZWfitBlb6e2-xqwxth8SE2vJXXP2zDr5IDgmLGYa9LMRVK151BhC";
+                const map = new WebMap({
+                    portalItem: {
+                        id: "5843cb2c614e4e60aaf97d02b69b038b"
+                    }
+                });
+                const view = new MapView({
+                    container: "viewDiv",
+                    map: map,
+                    center: [117.7, 36.674],
+                    zoom: 9
+                });
+                const listNode = document.getElementById("incomeList");
+                const featureLayer = new FeatureLayer({
+                    url: "https://services6.arcgis.com/QtQRjj2ygdzHBgtW/arcgis/rest/services/%E6%97%85%E6%B8%B8%E6%99%AF%E7%82%B9/FeatureServer/2",
+                    outFields: ["*"],
+                    popupTemplate: {
+                        title: "{Jdmc}",
+                        content: [
+                            {
+                                type: "fields",
+                                fieldInfos: [
+                                    {
+                                        fieldName: "Jdmc",
+                                        label: "景点名称",
+                                        format: {
+                                            places: 0,
+                                            digitSeparator: true
+                                        }
+                                    },
+                                    {
+                                        fieldName: "Jddj",
+                                        label: "景点等级",
+                                        format: {
+                                            places: 0,
+                                            digitSeparator: true
+                                        }
+                                    },
+                                    {
+                                        fieldName: "jqjj",
+                                        label: "景点简介",
+                                        format: {
+                                            places: 0,
+                                            digitSeparator: true
+                                        }
+                                    }
+                                ]
+                            }
+                        ]
+                    },
+                });
+                map.add(featureLayer);
+                let graphics;
+                let start = 0;
+                let highlight;
+                const featureCount = await featureLayer.queryFeatureCount();
+                document.getElementById("tablePager").setAttribute("total-items", featureCount);
+                const layerView = await view.whenLayerView(featureLayer);
+                queryPage(0);
+                function queryPage(page) {
+                    const query = {
+                        start: page,
+                        num: 23,
+                        outFields: ["*"],
+                        returnGeometry: true,
+                        orderByFields: ["Jddj DESC"]
+                    };
+                    const promise = featureLayer
+                        .queryFeatures(query)
+                        .then((featureSet) => convertFeatureSetToRows(featureSet, query));
+                }
+                function convertFeatureSetToRows(featureSet, query) {
+                    document.getElementById("incomeList").innerHTML = "";
+                    graphics = featureSet.features;
+                    graphics.forEach((result, index) => {
+                        const attributes = result.attributes;
+                        const name = attributes.Jdmc;
+                        const income = `景点等级: ${attributes.Jddj}`;
+                        const item = document.createElement("calcite-pick-list-item");
+                        item.setAttribute("label", name);
+                        item.setAttribute("value", index);
+                        item.setAttribute("description", income);
+                        item.addEventListener("click", onCountyClickHandler);
+                        document.getElementById("incomeList").appendChild(item);
+                    });
+                    if (highlight) {
+                        highlight.remove();
+                    }
+                    highlight = layerView.highlight(featureSet.features);
+                }
+                document.getElementById("tablePager").addEventListener("calcitePaginationChange", (event) => {
+                    let page;
+                    if (event.target.startItem === 1) {
+                        page = 0;
+                    } else {
+                        page = event.target.startItem;
+                    }
+                    queryPage(page);
+                    view.zoom = 8;
+                    view.center = [117.5, 36.674];
+                    if (view.popup.visible) {
+                        view.popup.visible = false;
+                    }
+                });
+                function onCountyClickHandler(event) {
+                    const target = event.target;
+                    const resultId = target.getAttribute("value");
+                    const result = resultId && graphics && graphics[parseInt(resultId, 10)];
+                    if (result) {
+                        view
+                            .goTo(result.geometry.extent.expand(6))
+                            .then(() => {
+                                view.openPopup({
+                                    features: [result],
+                                    location: result.geometry.centroid
+                                });
+                            })
+                            .catch((error) => {
+                                if (error.name !== "AbortError") {
+                                    console.error(error);
+                                }
+                            });
+                    }
+                }
+                const resultPanel = document.getElementById("result-panel");
+                const toggleButton = document.getElementById("toggle-button");
+                view.ui.add(toggleButton, "top-left");
+                toggleButton.addEventListener("click", function () {
+                    if (resultPanel.clientWidth == 390) {
+                        resultPanel.style.width = "0px";
+                        tablePager.style.width = "0px";
+                        toggleButton.icon = "chevrons-right";
+                        toggleButton.title = "打开旅游景点面板";
+                    } else {
+                        resultPanel.style.width = "390px";
+                        tablePager.style.width = "390px";
+                        toggleButton.icon = "chevrons-left";
+                        toggleButton.title = "关闭旅游景点面板";
+                    }
+                });
+                const locateBtn = new Locate({
+                    view: view
+                });
+                view.ui.add(locateBtn, {position: "top-left"});
+                //为测量小部件添加工具栏
+                view.ui.add("topbar", "top-right");
+                //创建测量小部件并默认隐藏它们
+                const distanceMeasurement2D = new DistanceMeasurement2D({
+                    view,
+                    visible: false
+                });
+                const areaMeasurement2D = new AreaMeasurement2D({
+                    view,
+                    visible: false
+                });
+                // 距离测量的事件监听器
+                document.getElementById("distanceButton").addEventListener("click", function() {
+                    setActiveWidget(null);
+                    if (!this.classList.contains("active")) {
+                        setActiveWidget("distance");
+                    } else {
+                        setActiveButton(null);
+                    }
+                });
+                // 面积测量的事件监听器
+                document.getElementById("areaButton").addEventListener("click", function() {
+                    setActiveWidget(null);
+                    if (!this.classList.contains("active")) {
+                        setActiveWidget("area");
+                    } else {
+                        setActiveButton(null);
+                    }
+                });
+                function setActiveWidget(type) {
+                    switch (type) {
+                        case "distance":
+                            areaMeasurement2D.visible = false;
+                            distanceMeasurement2D.visible = true;
+                            distanceMeasurement2D.viewModel.start();
+                            setActiveButton(document.getElementById("distanceButton"));
+                            break;
+                        case "area":
+                            distanceMeasurement2D.visible = false;
+                            areaMeasurement2D.visible = true;
+                            areaMeasurement2D.viewModel.start();
+                            setActiveButton(document.getElementById("areaButton"));
+                            break;
+                        case null:
+                            areaMeasurement2D.visible = false;
+                            distanceMeasurement2D.visible = false;
+                            break;
+                    }
+                }
+                function setActiveButton(selectedButton) {
+                    // focus the view to activate keyboard shortcuts for sketching
+                    view.focus();
+                    let elements = document.getElementsByClassName("active");
+                    for (let i = 0; i < elements.length; i++) {
+                        elements[i].classList.remove("active");
+                    }
+                    if (selectedButton) {
+                        selectedButton.classList.add("active");
+                    }
+                }
+            })());
+    </script>
+</head>
+<body>
+<div id="viewDiv"></div>
+<calcite-action
+        id="toggle-button"
+        text="Toggle results panel"
+        title="Collapse results panel"
+        icon="chevrons-left"
+        scale="s"
+>
+</calcite-action>
+<calcite-panel class="panel-side" id="result-panel">
+    <div slot="header-content" scale="s">
+        <h3 class="heading">山东省红色旅游景点</h3>
+        <p>单击进行详细信息查看</p>
+        <p></p>
+    </div>
+    <div id="topbar">
+        <button class="action-button esri-icon-measure-area" id="areaButton" type="button" title="面积量算"></button>
+        <button class="action-button esri-icon-measure-line" id="distanceButton" type="button" title="距离量算"></button>
+    </div>
+    <calcite-panel id="resultsDiv">
+        <calcite-pick-list id="incomeList"></calcite-pick-list>
+    </calcite-panel>
+    <div slot="footer">
+        <calcite-pagination id="tablePager" start-item="1" page-size="20"></calcite-pagination>
+    </div>
+</calcite-panel>
+</body>
+</html>

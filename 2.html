@@ -1,0 +1,75 @@
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no">
+    <title>Edit features with the Editor widget | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <script>
+        require([
+            "esri/WebMap",
+            "esri/views/MapView",
+            "esri/widgets/Editor"
+        ], (
+            WebMap, MapView,
+            Editor
+        ) => {
+            const webmap = new WebMap({
+                portalItem: {
+                    id: "5843cb2c614e4e60aaf97d02b69b038b"
+                }
+            });
+            const view = new MapView({
+                container: "viewDiv",
+                map: webmap,
+                center: [117.7, 36.674],
+                zoom: 9
+            });
+            // 创建一个按钮
+            const button = document.createElement("button");
+            button.textContent = "打开编辑器";
+            let editor = null; // 用于跟踪编辑器微件的引用
+            // 当点击按钮时调用微件或关闭/隐藏微件
+            button.addEventListener("click", () => {
+                if (!editor) {
+                    // 如果编辑器微件不存在，则创建并添加到视图的右上角
+                    editor = new Editor({
+                        view: view
+                    });
+                    view.ui.add(editor, "top-right");
+                    button.textContent = "关闭编辑器"; // 更新按钮文本
+                } else {
+                    // 如果编辑器微件已经存在，则移除它
+                    view.ui.remove(editor);
+                    editor.destroy(); // 销毁编辑器以释放资源
+                    editor = null; // 重置编辑器引用
+                    button.textContent = "打开编辑器"; // 更新按钮文本
+                }
+            });
+            // 将按钮添加到视图的 UI 中
+            view.ui.add(button, "top-right");
+            view.when(() => {
+                const layerList = new LayerList({
+                    view: view
+                });
+                // Add widget to the top right corner of the view
+                view.ui.add(layerList, "top-right");
+            });
+        });
+    </script>
+</head>
+<body>
+<div id="viewDiv"></div>
+</body>
+</html>

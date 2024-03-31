@@ -1,0 +1,87 @@
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+    <title>Search Widget | Sample | ArcGIS Maps SDK for JavaScript 4.29</title>
+    <style>
+        html,
+        body,
+        #viewDiv {
+            padding: 0;
+            margin: 0;
+            height: 100%;
+            width: 100%;
+        }
+    </style>
+    <link rel="stylesheet" href="https://js.arcgis.com/4.29/esri/themes/light/main.css" />
+    <script src="https://js.arcgis.com/4.29/"></script>
+    <script>
+        require([
+            "esri/WebMap",
+            "esri/views/MapView",
+            "esri/widgets/Search",
+            "esri/widgets/Expand",
+            "esri/widgets/BasemapGallery",
+            "esri/core/reactiveUtils",
+            "esri/widgets/LayerList"
+            ], (
+                WebMap, MapView,
+                Search,Expand,BasemapGallery,reactiveUtils,LayerList) => {
+                const webmap = new WebMap({
+                    portalItem: {
+                        id: "5843cb2c614e4e60aaf97d02b69b038b"
+                    }
+                });
+                const view = new MapView({
+                    container: "viewDiv",
+                    map: webmap,
+                    center: [117.7, 36.674],
+                    zoom: 9
+                });
+            const searchWidget = new Search({
+                view: view
+            });
+            view.ui.add(searchWidget, {
+                position: "top-right"
+            });
+            const basemapGallery = new BasemapGallery({
+                view: view,
+                container: document.createElement("div")
+            });
+            const bgExpand = new Expand({
+                view: view,
+                content: basemapGallery
+            });
+            reactiveUtils.watch(
+                () => basemapGallery.activeBasemap,
+                () => {
+                    const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+                    if (mobileSize) {
+                        bgExpand.collapse();
+                    }
+                }
+            );
+            view.ui.add(bgExpand, "top-right");
+            const layerList = new LayerList({
+                view: view,
+                listItemCreatedFunction: (event) => {
+                    const item = event.item;
+                    if (item.layer.type != "group") {
+                        item.panel = {
+                            content: "legend",
+                            open: true
+                        };
+                    }
+                }
+            });
+            view.ui.add(layerList,"bottom-left");
+        });
+    </script>
+</head>
+<body>
+<div id="viewDiv"></div>
+</body>
+</html>
+
+
+
