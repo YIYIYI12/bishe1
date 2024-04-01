@@ -18,6 +18,7 @@
     <script>
         require([
             "esri/WebMap",
+            "esri/config",
             "esri/views/MapView",
             "esri/widgets/Search",
             "esri/widgets/Expand",
@@ -25,18 +26,19 @@
             "esri/core/reactiveUtils",
             "esri/widgets/LayerList"
             ], (
-                WebMap, MapView,
+                WebMap, config,MapView,
                 Search,Expand,BasemapGallery,reactiveUtils,LayerList) => {
+                //esriConfig.apiKey = "AAPK842e3403e5b24c3bb6364ccb160bf621flv8I-Kv6HKAZWfitBlb6e2-xqwxth8SE2vJXXP2zDr5IDgmLGYa9LMRVK151BhC";
                 const webmap = new WebMap({
                     portalItem: {
-                        id: "5843cb2c614e4e60aaf97d02b69b038b"
+                       id: "66f21199746d47b69db0b72994843f6c"
                     }
                 });
                 const view = new MapView({
                     container: "viewDiv",
                     map: webmap,
                     center: [117.7, 36.674],
-                    zoom: 9
+                    zoom: 8
                 });
             const searchWidget = new Search({
                 view: view
@@ -74,7 +76,7 @@
                     }
                 }
             });
-            view.ui.add(layerList,"bottom-left");
+            view.ui.add(layerList,"bottom-right");
         });
     </script>
 </head>

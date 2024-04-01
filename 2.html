@@ -20,10 +20,14 @@
         require([
             "esri/WebMap",
             "esri/views/MapView",
-            "esri/widgets/Editor"
+            "esri/widgets/Editor",
+            "esri/widgets/BasemapGallery",
+            "esri/views/SceneView",
+            "esri/widgets/Expand",
+            "esri/core/reactiveUtils"
         ], (
             WebMap, MapView,
-            Editor
+            Editor,BasemapGallery,SceneView,Expand,reactiveUtils
         ) => {
             const webmap = new WebMap({
                 portalItem: {
@@ -34,7 +38,7 @@
                 container: "viewDiv",
                 map: webmap,
                 center: [117.7, 36.674],
-                zoom: 9
+                zoom: 8
             });
             // 创建一个按钮
             const button = document.createElement("button");
@@ -66,6 +70,25 @@
                 // Add widget to the top right corner of the view
                 view.ui.add(layerList, "top-right");
             });
+            const basemapGallery = new BasemapGallery({
+                view: view,
+                container: document.createElement("div")
+            });
+            const bgExpand = new Expand({
+                view: view,
+                content: basemapGallery
+            });
+            reactiveUtils.watch(
+                () => basemapGallery.activeBasemap,
+                () => {
+                    const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+
+                    if (mobileSize) {
+                        bgExpand.collapse();
+                    }
+                }
+            );
+            view.ui.add(bgExpand, "top-right");
         });
     </script>
 </head>

@@ -11,6 +11,7 @@ body {
 #hd {
     height: 60px;
     background:blue;
+    background-image: url("../images/topbg.png");
 }
 #hd .hd-wrap {
     position: relative;
@@ -104,7 +105,7 @@ h1 {
     height: 100%;
     float: left;
     margin-left: -181px;
-    width: 175px;
+    width: 130px;
     overflow-y: auto;
 }
 
@@ -135,28 +136,29 @@ h1 {
 .sidebar .nav>li .nav-header {
     padding-right: 14px;
 }
-
+/*文字格式*/
 .sidebar .nav>li .nav-header a {
     display: block;
-    margin-left: 15px;
-    padding-left: 32px;
+    margin-left: 0px;
+    padding-left: 10px;
     color: #000;
     font-size: 13px;
 }
 
-.sidebar .nav>li .nav-header a span {
-    float: left;
-}
 
-.sidebar .nav>li.office .nav-header a {
-    background: url(../images/1.jpg) no-repeat left center;
-    background-size: 20px 20px;
-}
+/*.sidebar .nav>li .nav-header a span {*/
+/*    float: left;*/
+/*}*/
 
-.sidebar .nav>li.land .nav-header a {
-    background: url(../images/1.jpg) no-repeat left center;
-    background-size: 20px 20px;
-}
+/*.sidebar .nav>li.office .nav-header a {*/
+/*    background: url(../images/1.jpg) no-repeat left center;*!*/
+/*    background-size: 20px 20px;*/
+/*}*/
+
+/*.sidebar .nav>li.land .nav-header a {*/
+/*    background: url(../images/1.jpg) no-repeat left center;*!*/
+/*    background-size: 20px 20px;*/
+/*}*/
 
 
 /*弹窗内容样式*/

@@ -58,19 +58,24 @@
             "esri/widgets/Locate",
             "esri/widgets/AreaMeasurement2D",
             "esri/widgets/DistanceMeasurement2D",
-        ], (esriConfig,WebMap, MapView,FeatureLayer,Locate,AreaMeasurement2D,DistanceMeasurement2D) =>
+            "esri/widgets/BasemapGallery",
+            "esri/views/SceneView",
+            "esri/widgets/Expand",
+            "esri/core/reactiveUtils"
+        ], (esriConfig,WebMap, MapView,FeatureLayer,Locate,AreaMeasurement2D,DistanceMeasurement2D,BasemapGallery,SceneView, Expand, reactiveUtils) =>
             (async () => {
                 esriConfig.apiKey = "AAPK842e3403e5b24c3bb6364ccb160bf621flv8I-Kv6HKAZWfitBlb6e2-xqwxth8SE2vJXXP2zDr5IDgmLGYa9LMRVK151BhC";
                 const map = new WebMap({
                     portalItem: {
-                        id: "5843cb2c614e4e60aaf97d02b69b038b"
+                        //id: "5843cb2c614e4e60aaf97d02b69b038b"
+                        id:"9fd2382292ba45a896d315714e71d3ab"
                     }
                 });
                 const view = new MapView({
                     container: "viewDiv",
                     map: map,
                     center: [117.7, 36.674],
-                    zoom: 9
+                    zoom: 8
                 });
                 const listNode = document.getElementById("incomeList");
                 const featureLayer = new FeatureLayer({
@@ -203,6 +208,32 @@
                 const locateBtn = new Locate({
                     view: view
                 });
+
+
+                const basemapGallery = new BasemapGallery({
+                    view: view,
+                    container: document.createElement("div")
+                });
+                const bgExpand = new Expand({
+                    view: view,
+                    content: basemapGallery
+                });
+                reactiveUtils.watch(
+                    () => basemapGallery.activeBasemap,
+                    () => {
+                        const mobileSize = view.heightBreakpoint === "xsmall" || view.widthBreakpoint === "xsmall";
+
+                        if (mobileSize) {
+                            bgExpand.collapse();
+                        }
+                    }
+                );
+                view.ui.add(bgExpand, "top-right");
+
+
+
+
+
                 view.ui.add(locateBtn, {position: "top-left"});
                 //为测量小部件添加工具栏
                 view.ui.add("topbar", "top-right");

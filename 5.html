@@ -1,0 +1,105 @@
+<!doctype html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="initial-scale=1.0, user-scalable=no, width=device-width">
+  <title>带检索功能的信息窗体</title>
+  <link rel="stylesheet" href="https://a.amap.com/jsapi_demos/static/demo-center/css/demo-center.css"/>
+  <style>
+    html, body, #container {
+      height: 100%;
+      width: 100%;
+    }
+
+    .custom-input-card {
+      width: 22rem;
+    }
+
+    .custom-input-card .btn {
+      margin-right: 1rem;
+    }
+
+    .custom-input-card .btn:last-child {
+      margin-right: 0;
+    }
+
+    .info-title {
+      color: white;
+      font-size: 14px;
+      background-color: #25A5F7;
+      line-height: 26px;
+      padding: 0px 0 0 6px;
+      font-weight: lighter;
+      letter-spacing: 1px
+    }
+
+    .info-content {
+      font: 12px Helvetica, 'Hiragino Sans GB', 'Microsoft Yahei', '微软雅黑', Arial;
+      padding: 4px;
+      color: #666666;
+      line-height: 23px;
+    }
+
+    .info-content img {
+      float: left;
+      margin: 3px;
+    }
+
+    .amap-info-combo .keyword-input{
+      height: 25px;
+      border-radius: 2px 0 0 2px;
+    }
+  </style>
+  <script type="text/javascript">
+    window._AMapSecurityConfig = {
+      securityJsCode: "8f7efde0244bcaf5c9f04b50e47c9e02",
+    };
+  </script>
+
+</head>
+<body>
+<div id="container"></div>
+<div style="display: none">
+  <h4>切换信息窗体</h4>
+  <div class="input-item">
+    <input id='lnglat' value='116.39,39.9'>
+    <input id='lnglat1'>
+    <input id='lnglat2'>
+  </div>
+</div>
+<script type="text/javascript"
+        src="https://webapi.amap.com/maps?v=1.4.15&key=0c6edc20840b4a812125ad0da7e4975d&plugin=AMap.AdvancedInfoWindow,Geocoder"></script>
+<script type="text/javascript">
+  var map = new AMap.Map('container', {
+    viewMode:'3D',
+    pitch:50,
+    resizeEnable: true,
+    center: [117.079878,36.654882],
+    zoom: 15
+  });
+  var marker = AMap.Marker();
+  var content = '<div class="info-title">山东省红色旅游智慧服务平台</div><div class="info-content">' +
+          '<img src="https://webapi.amap.com/images/amap.jpg">' +
+          '选择到达景点查询<br/>';
+  map.on('click',function (e){
+    document.getElementById('lnglat').value = e.lnglat;
+    document.getElementById('lnglat1').value = e.lnglat.getLng();
+    document.getElementById('lnglat2').value = e.lnglat.getLat();
+    // document.getElementById("lnglat").value = e.lnglat.getLng() + ',' + e.lnglat.getLat();
+    var lnglat1=document.getElementById('lnglat1').value;
+    var lnglat2=document.getElementById('lnglat2').value;
+    var lnglat=[lnglat1,lnglat2];
+    infowindow1.open(map,lnglat);
+    // var marker = new AMap.Marker({
+    //   position: lnglat
+    // });
+    // marker.setMap(map);
+  })
+  var infowindow1 = new AMap.AdvancedInfoWindow({
+    content: content,
+    offset: new AMap.Pixel(0, -30),
+  });
+</script>
+</body>
+</html>
